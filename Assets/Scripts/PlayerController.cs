@@ -6,17 +6,14 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5f;
-    public GameObject focalPoint;
     private Rigidbody rb;
-    private Coroutine runingSmashRoutine= null;
+    private Coroutine runingSmashRoutine = null;
     private InputAction moveAction;
     private InputAction smashAction;
     private InputAction breakAction;
 
     private bool hasPowerUp = false;
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -25,22 +22,22 @@ public class PlayerController : MonoBehaviour
         breakAction = InputSystem.actions.FindAction("Break");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        float verticalInput = moveAction.ReadValue<Vector2>().y;
-        rb.AddForce(verticalInput * speed*  focalPoint.transform.forward);
+        Vector2 input = moveAction.ReadValue<Vector2>();
+        Vector3 movement = new Vector3(input.x, 0, input.y);
+        rb.AddForce(movement * speed);
+
         if (breakAction.IsPressed())
         {
-            rb.linearVelocity = Vector3.zero;
-            
+            rb.velocity = Vector3.zero;
         }
 
         if (smashAction.triggered)
         {
-            if (hasPowerUp == true)
+            if (hasPowerUp)
             {
-               runingSmashRoutine = StartCoroutine(SmashRoutine());
+                runingSmashRoutine = StartCoroutine(SmashRoutine());
             }
         }
     }
@@ -64,7 +61,7 @@ public class PlayerController : MonoBehaviour
                 Vector3 dir = collision.transform.position - transform.position;
                 dir.Normalize();
                 Rigidbody EnemyRb = collision.gameObject.GetComponent<Rigidbody>();
-                EnemyRb.AddForce(dir * 10f, ForceMode.Impulse);
+                EnemyRb.AddForce(dir * 100f, ForceMode.Impulse);
             }
         }
     }
@@ -88,14 +85,12 @@ public class PlayerController : MonoBehaviour
             yield return null;
             if (chargetime >= 2f)
             {
-                Debug.Log("Smash activated!!");
                 break;
             }
         }
 
         if (chargetime > 2f)
         {
-            Debug.Log("Smash cancled");
             yield break;
         }
 
@@ -103,11 +98,9 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < enemies.Length; i++)
         {
             Rigidbody enemyRb = enemies[i].GetComponent<Rigidbody>();
-            enemyRb.AddExplosionForce(10f, transform.position, 100,0, ForceMode.Impulse);
+            enemyRb.AddExplosionForce(100f, transform.position, 10, 0, ForceMode.Impulse);
         }
-        
-        yield return null;
 
+        yield return null;
     }
-    
 }

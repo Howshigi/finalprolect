@@ -4,8 +4,10 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - PowerUp
   - Enemy
+  - MazeGeo
+  - PowerUp
+  - Coin
   layers:
   - Default
   - TransparentFX
